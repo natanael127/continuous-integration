@@ -1,19 +1,30 @@
 #include "../inc/strings.h"
 
+unsigned int my_strlen(const char *str)
+{
+    unsigned int result = 0;
+
+    while(*str++ != '\0')
+    {
+        result++;
+    }
+
+    return result;
+}
+
 void my_strcpy(char *dest, const char *src)
 {
     while(*src != '\0')
     {
         *dest++ = *src++;
     }
+
     *dest = '\0';
 }
 
 void my_strcat(char *dest, const char *src)
 {
-    while(*dest++ != '\0');
-    dest--;
-    my_strcpy(dest, src);
+    my_strcpy(&dest[my_strlen(dest)], src);
 }
 
 char my_strcmp(const char *str1, const char *str2)
