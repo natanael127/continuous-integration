@@ -21,6 +21,7 @@ all:$(OBJ_FILES)
 clean:
 	@mkdir -p $(OBJ_FOLDER)
 	@find $(OBJ_FOLDER) -type f -name '*.o' -exec rm {} +
+	@find $(BIN_FOLDER) -type f -name '*.bin' -exec rm {} +
 run:all
 	@$(OUTPUT)
 %.o:
