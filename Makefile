@@ -19,9 +19,11 @@ OBJ_FILES := $(addprefix $(OBJ_FOLDER), $(OBJ_NAMES))
 all:$(OBJ_FILES)
 	@$(CC) $(FLAGS) -o $(OUTPUT) $(OBJ_FILES)
 clean:
+	@mkdir -p $(OBJ_FOLDER)
 	@find $(OBJ_FOLDER) -type f -name '*.o' -exec rm {} +
 run:all
 	@$(OUTPUT)
 %.o:
+	@mkdir -p $(dir $@)
 	@echo Building $(addprefix $(COMP_FOLDER), $(patsubst $(OBJ_FOLDER)%.o, %.c, $@))
 	@$(CC) $(FLAGS) -c -o $@ $(addprefix $(COMP_FOLDER), $(patsubst $(OBJ_FOLDER)%.o, %.c, $@))
