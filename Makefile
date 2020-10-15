@@ -24,6 +24,8 @@ clean:
 	@find . -type f -name '*.o' -exec rm {} +
 	@find . -type f -name '*.bin' -exec rm {} +
 run:all
+	@echo Running the application
+	@echo =========================================================
 	@$(OUTPUT)
 $(OBJ_FOLDER)%.o:$(COMP_FOLDER)%.c
 	@echo Building \"$@\" from \"$<\"
