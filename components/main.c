@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "strings/inc/strings.h"
 #include "math/mathematics.h"
+#include "dep_header.h"
 
 int main(void)
 {
@@ -20,7 +21,7 @@ int main(void)
     printf("C(5,2) = %lld\n", my_combination(5, 2));
     printf("P(5,2) = %lld\n", my_permutation(5, 2));
     printf("5.03 mod 1.20 = %f\n", my_fmod(5.03, 1.20));
-    printf("sin(pi/2) = %f\n", my_sin(1.570796327));
+    printf("sin(pi/2) = %f\n", my_sin(TEST_DEPENDENCY));
     printf("sin(428) = %f\n", my_sin(428));
     printf("sin(1) = %f\n", my_sin(1));
     printf("sin(2) = %f\n", my_sin(2));

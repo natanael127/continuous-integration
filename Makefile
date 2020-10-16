@@ -1,30 +1,51 @@
-# ================================== MACROS ============================================================================
+# ================================== CUSTOMIZED MACROS =================================================================
 # Recursive wildcard macro
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 # ================================== CONSTANTS =========================================================================
-OBJ_FOLDER := obj/
-COMP_FOLDER := components/
-BIN_FOLDER := bin/
+# Extensions
+SRC_EXT := c
+OBJ_EXT := o
+DEP_EXT := d
+TMP_EXT := tmp
+BIN_EXT := elf
+# Paths
+SRC_DIR := components/
+OBJ_DIR := build/obj/
+DEP_DIR := build/dep/
+BIN_DIR := build/bin/
+BIN_NAME := app
+# Compiler
 CC := gcc
-FLAGS := -Wall
-OUTPUT := $(BIN_FOLDER)output.bin
+CFLAGS := -Wall
 
 # ================================== VARIABLES FROM MACROS =============================================================
-SRC_FILES := $(call rwildcard,$(COMP_FOLDER),*.c)
-OBJ_NAMES := $(patsubst $(COMP_FOLDER)%.c, %.o, $(SRC_FILES))
-OBJ_FILES := $(addprefix $(OBJ_FOLDER), $(OBJ_NAMES))
+BIN_PATH := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
+SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
+OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
+DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
 
 # ================================== TARGETS ===========================================================================
-all:$(OBJ_FILES)
-	@$(CC) $(FLAGS) -o $(OUTPUT) $(OBJ_FILES)
+all: $(OBJ_FILES)
+	@echo Linking objects to \"$(BIN_PATH)\"
+	@mkdir -p $(BIN_DIR)
+	@$(CC) $(CFLAGS) -o $(BIN_PATH) $(OBJ_FILES)
 clean:
-	@mkdir -p $(OBJ_FOLDER)
-	@find $(OBJ_FOLDER) -type f -name '*.o' -exec rm {} +
-	@find $(BIN_FOLDER) -type f -name '*.bin' -exec rm {} +
-run:all
-	@$(OUTPUT)
-%.o:
+	@find . -type f -name '*.$(OBJ_EXT)' -exec rm {} +
+	@find . -type f -name '*.$(DEP_EXT)' -exec rm {} +
+	@find . -type f -name '*.$(BIN_EXT)' -exec rm {} +
+run: all
+	@echo Running the application
+	@echo =========================================================
+	@$(BIN_PATH)
+$(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
+	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
-	@echo Building $(addprefix $(COMP_FOLDER), $(patsubst $(OBJ_FOLDER)%.o, %.c, $@))
-	@$(CC) $(FLAGS) -c -o $@ $(addprefix $(COMP_FOLDER), $(patsubst $(OBJ_FOLDER)%.o, %.c, $@))
+	@$(CC) $(CFLAGS) -c -o $@ $<
+$(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
+	@echo Creating dependency \"$@\" from \"$<\"
+	@mkdir -p $(dir $@)
+	@$(CC) -M $< > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+	@(echo -n $(OBJ_DIR) && cat $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)) > $@
+	@rm -f $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+include $(DEP_FILES)
