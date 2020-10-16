@@ -16,7 +16,7 @@ BIN_DIR := build/bin/
 BIN_NAME := app
 # Compiler
 CC := gcc
-FLAGS := -Wall
+CFLAGS := -Wall
 
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_PATH := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
@@ -28,7 +28,7 @@ OBJ_FILES := $(addprefix $(OBJ_DIR), $(OBJ_NAMES))
 all: $(OBJ_FILES)
 	@echo Linking objects to \"$(BIN_PATH)\"
 	@mkdir -p $(BIN_DIR)
-	@$(CC) $(FLAGS) -o $(BIN_PATH) $(OBJ_FILES)
+	@$(CC) $(CFLAGS) -o $(BIN_PATH) $(OBJ_FILES)
 clean:
 	@find . -type f -name '*.$(OBJ_EXT)' -exec rm {} +
 	@find . -type f -name '*.$(DEP_EXT)' -exec rm {} +
@@ -40,4 +40,4 @@ run: all
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
-	@$(CC) $(FLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
