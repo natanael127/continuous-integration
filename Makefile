@@ -21,8 +21,8 @@ CFLAGS := -Wall
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_PATH := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
 SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
-OBJ_NAMES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), %.$(OBJ_EXT), $(SRC_FILES))
-OBJ_FILES := $(addprefix $(OBJ_DIR), $(OBJ_NAMES))
+OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
+DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
 
 # ================================== TARGETS ===========================================================================
 all: $(OBJ_FILES)
