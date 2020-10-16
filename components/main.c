@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "strings/inc/strings.h"
 #include "math/mathematics.h"
-#include "test.h"
+#include "dep_header.h"
 
 int main(void)
 {
