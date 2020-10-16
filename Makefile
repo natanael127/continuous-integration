@@ -6,11 +6,13 @@ rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 # Extensions
 SRC_EXT := c
 OBJ_EXT := o
+DEP_EXT := d
 BIN_EXT := elf
 # Paths
 SRC_FOLDER := components/
-OBJ_FOLDER := obj/
-BIN_FOLDER := bin/
+OBJ_FOLDER := build/obj/
+DEP_FOLDER := build/dep/
+BIN_FOLDER := build/bin/
 BIN_NAME := app
 # Compiler
 CC := gcc
@@ -29,6 +31,7 @@ all: $(OBJ_FILES)
 	@$(CC) $(FLAGS) -o $(BIN_PATH) $(OBJ_FILES)
 clean:
 	@find . -type f -name '*.$(OBJ_EXT)' -exec rm {} +
+	@find . -type f -name '*.$(DEP_EXT)' -exec rm {} +
 	@find . -type f -name '*.$(BIN_EXT)' -exec rm {} +
 run: all
 	@echo Running the application
