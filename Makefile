@@ -7,6 +7,7 @@ rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 SRC_EXT := c
 OBJ_EXT := o
 DEP_EXT := d
+TMP_EXT := tmp
 BIN_EXT := elf
 # Paths
 SRC_DIR := components/
@@ -44,7 +45,8 @@ $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT)
 $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@echo Creating dependency \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
-	@set -e; rm -f $@; \
-	$(CC) -M $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	rm -f $@.$$$$
+	@set -e; rm -f $@
+	@$(CC) -M $< > $@
+	@sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@ > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+	@(echo -n $(OBJ_DIR) && cat $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)) > $@
+	@rm -f $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
