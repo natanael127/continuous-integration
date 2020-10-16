@@ -12,14 +12,14 @@ SRC_FOLDER := components/
 OBJ_FOLDER := obj/
 BIN_FOLDER := bin/
 BIN_NAME := app
-BIN_PATH := $(BIN_FOLDER)$(BIN_NAME).$(BIN_EXT)
 # Compiler
 CC := gcc
 FLAGS := -Wall
 
 # ================================== VARIABLES FROM MACROS =============================================================
-SRC_FILES := $(call rwildcard,$(SRC_FOLDER),*.c)
-OBJ_NAMES := $(patsubst $(SRC_FOLDER)%.c, %.o, $(SRC_FILES))
+BIN_PATH := $(BIN_FOLDER)$(BIN_NAME).$(BIN_EXT)
+SRC_FILES := $(call rwildcard,$(SRC_FOLDER),*.$(SRC_EXT))
+OBJ_NAMES := $(patsubst $(SRC_FOLDER)%.$(SRC_EXT), %.$(OBJ_EXT), $(SRC_FILES))
 OBJ_FILES := $(addprefix $(OBJ_FOLDER), $(OBJ_NAMES))
 
 # ================================== TARGETS ===========================================================================
@@ -34,7 +34,7 @@ run: all
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_PATH)
-$(OBJ_FOLDER)%.o: $(SRC_FOLDER)%.c
+$(OBJ_FOLDER)%.$(OBJ_EXT): $(SRC_FOLDER)%.$(SRC_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
 	@$(CC) $(FLAGS) -c -o $@ $<
