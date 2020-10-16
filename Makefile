@@ -38,7 +38,7 @@ run: all
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_PATH)
-$(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT)
+$(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c -o $@ $<
@@ -50,3 +50,4 @@ $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@ > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
 	@(echo -n $(OBJ_DIR) && cat $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)) > $@
 	@rm -f $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+include $(DEP_FILES)
