@@ -41,3 +41,10 @@ $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c -o $@ $<
+$(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
+	@echo Creating dependency \"$@\" from \"$<\"
+	@mkdir -p $(dir $@)
+	@set -e; rm -f $@; \
+	$(CC) -M $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
