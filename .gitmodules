@@ -1,0 +1,3 @@
+[submodule "components/git-description-parser"]
+	path = components/git-description-parser
+	url = https://github.com/natanael127/git-description-parser.git
