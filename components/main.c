@@ -8,7 +8,7 @@
 
 int main(void)
 {
-    //Testing git description parser
+    //Git description parser
     git_description_t my_description = git_describe_parse();
 
     printf("Commit hash: %s\n", my_description.commit_hash_short);
@@ -29,7 +29,8 @@ int main(void)
     } else {
         printf("Working tree clean\n");
     }
-    
+
+    #ifdef _TEST_MODE
     //Testing strings
     printf(SECTION_SEPARATOR);
     char buffer[100];
@@ -54,6 +55,7 @@ int main(void)
     printf("sin(2) = %f\n", my_sin(2));
     printf("sin(4) = %f\n", my_sin(4));
     printf("sin(6) = %f\n", my_sin(6));
+    #endif /* _TEST_MODE */
 
     return 0;
 }
