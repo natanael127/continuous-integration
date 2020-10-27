@@ -47,23 +47,16 @@ all: $(OBJ_FILES)
 	@mkdir -p $(BIN_DIR)
 	@$(CC) $(C_FLAGS) -o $(BIN_PATH) $(OBJ_FILES)
 clean:
-	@find $(BUILD_DIR) -type f -name '*.$(OBJ_EXT)' -exec rm {} +
-	@find $(BUILD_DIR) -type f -name '*.$(DEP_EXT)' -exec rm {} +
-	@find $(BUILD_DIR) -type f -name '*.$(LST_EXT)' -exec rm {} +
-	@find $(BUILD_DIR) -type f -name '*.$(ANL_EXT)' -exec rm {} +
-	@find $(BUILD_DIR) -type f -name '*.$(BIN_EXT)' -exec rm {} +
+	@rm -rf $(BUILD_DIR)
 run: all
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_PATH)
-analysis: clean analysis_list
-	@echo Static analysis
-	@echo =========================================================
+analysis:
+	@mkdir -p $(ANL_DIR)
+	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
 	@cppcheck --enable=all --project=$(LST_FILE) --output-file=$(ANL_FILE)
 	@cat $(ANL_FILE)
-analysis_list:
-	@mkdir -p $(ANL_DIR)
-	@bear -o $(LST_FILE) make -s
 test: clean test_setup run
 test_setup:
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
