@@ -23,6 +23,7 @@ BIN_NAME := app
 CC := gcc
 C_FLAGS := -Wall
 PRJ_FLAGS := -D_GIT_DESCRIPTION_STR=$(GIT_DESCRIPTION_STR) -D_GIT_COMMIT_HASH_STR=$(GIT_COMMIT_HASH_STR)
+TEST_FLAGS := -D_TEST_MODE
 
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_PATH := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
@@ -36,6 +37,7 @@ all: $(OBJ_FILES)
 	@mkdir -p $(BIN_DIR)
 	@$(CC) $(C_FLAGS) -o $(BIN_PATH) $(OBJ_FILES)
 clean:
+	@echo Cleaning output files
 	@find . -type f -name '*.$(OBJ_EXT)' -exec rm {} +
 	@find . -type f -name '*.$(DEP_EXT)' -exec rm {} +
 	@find . -type f -name '*.$(BIN_EXT)' -exec rm {} +
@@ -43,6 +45,9 @@ run: all
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_PATH)
+test: clean test_setup run
+test_setup:
+	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
