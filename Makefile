@@ -55,7 +55,7 @@ $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@echo Creating dependency \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
-	@$(CC) -M $< > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+	@$(CC) -MM $< > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
 	@(echo -n $(OBJ_DIR) && cat $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)) > $@
 	@rm -f $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
 include $(DEP_FILES)
