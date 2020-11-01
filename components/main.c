@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "strings/inc/strings.h"
-#include "git-description-parser/git_describe_parser.h"
+#include "git-description-parser/git_description_parser.h"
 #include "math/mathematics.h"
 #include "dep_header.h"
 
