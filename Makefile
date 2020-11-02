@@ -22,6 +22,7 @@ OBJ_DIR := $(BUILD_DIR)obj/
 DEP_DIR := $(BUILD_DIR)dep/
 BIN_DIR := $(BUILD_DIR)bin/
 ANL_DIR := $(BUILD_DIR)analysis/
+CPX_DIR := $(ANL_DIR)complexity/
 BIN_NAME := app
 # Compiler
 CC := gcc
@@ -30,7 +31,9 @@ PRJ_FLAGS := -D_GIT_DESCRIPTION_STR=$(GIT_DESCRIPTION_STR) -D_GIT_COMMIT_HASH_ST
 TEST_FLAGS := -D_TEST_MODE
 # Static analysis
 LST_NAME := project
-ANL_NAME := analysis
+STC_NAME := static
+CPX_NAME := complexity
+COMPLEXITY_GLOBAL_THRESHOLD := 0
 
 
 # ================================== VARIABLES FROM MACROS =============================================================
@@ -39,7 +42,8 @@ SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
 OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
 DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
 LST_FILE := $(ANL_DIR)$(LST_NAME).$(LST_EXT)
-ANL_FILE := $(ANL_DIR)$(ANL_NAME).$(ANL_EXT)
+STC_FILE := $(ANL_DIR)$(STC_NAME).$(ANL_EXT)
+CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
 
 # ================================== TARGETS ===========================================================================
 all: $(OBJ_FILES)
@@ -55,18 +59,24 @@ run: all
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
-	@cppcheck --enable=all --project=$(LST_FILE) --output-file=$(ANL_FILE)
-	@cat $(ANL_FILE)
+	@cppcheck --quiet --enable=all --project=$(LST_FILE) --output-file=$(STC_FILE)
+	@complexity --histogram --score --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $(SRC_FILES) > $(CPX_FILE)
+	@cat $(STC_FILE)
+	@cat $(CPX_FILE)
 test: clean test_setup run
 test_setup:
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
+	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
+	@mkdir -p $(dir $(CPX_INDIVIDUAL_FILE))
 	@mkdir -p $(dir $@)
 	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<
+	@complexity --histogram --score --trace=$(CPX_INDIVIDUAL_FILE) --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $< >> $(CPX_INDIVIDUAL_FILE)
 $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@mkdir -p $(dir $@)
-	@$(CC) -MM $< > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
-	@(echo -n $(OBJ_DIR) && cat $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)) > $@
-	@rm -f $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+	@$(eval TMP_FILE := $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@))
+	@$(CC) -MM $< > $(TMP_FILE)
+	@(echo -n $(OBJ_DIR) && cat $(TMP_FILE)) > $@
+	@rm -f $(TMP_FILE)
 include $(DEP_FILES)
