@@ -22,6 +22,7 @@ OBJ_DIR := $(BUILD_DIR)obj/
 DEP_DIR := $(BUILD_DIR)dep/
 BIN_DIR := $(BUILD_DIR)bin/
 ANL_DIR := $(BUILD_DIR)analysis/
+CPX_DIR := $(ANL_DIR)complexity/
 BIN_NAME := app
 # Compiler
 CC := gcc
@@ -69,6 +70,9 @@ $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@mkdir -p $(dir $@)
 	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<
+	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
+	@mkdir -p $(dir $(CPX_INDIVIDUAL_FILE))
+	@complexity --histogram --score --trace=$(CPX_INDIVIDUAL_FILE) --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $< >> $(CPX_INDIVIDUAL_FILE)
 $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@mkdir -p $(dir $@)
 	@$(CC) -MM $< > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
