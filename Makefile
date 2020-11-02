@@ -30,7 +30,9 @@ PRJ_FLAGS := -D_GIT_DESCRIPTION_STR=$(GIT_DESCRIPTION_STR) -D_GIT_COMMIT_HASH_ST
 TEST_FLAGS := -D_TEST_MODE
 # Static analysis
 LST_NAME := project
-ANL_NAME := analysis
+STC_NAME := static
+CPX_NAME := complexity
+COMPLEXITY_GLOBAL_THRESHOLD := 0
 
 
 # ================================== VARIABLES FROM MACROS =============================================================
@@ -39,7 +41,8 @@ SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
 OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
 DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
 LST_FILE := $(ANL_DIR)$(LST_NAME).$(LST_EXT)
-ANL_FILE := $(ANL_DIR)$(ANL_NAME).$(ANL_EXT)
+STC_FILE := $(ANL_DIR)$(STC_NAME).$(ANL_EXT)
+CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
 
 # ================================== TARGETS ===========================================================================
 all: $(OBJ_FILES)
@@ -55,8 +58,10 @@ run: all
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
-	@cppcheck --enable=all --project=$(LST_FILE) --output-file=$(ANL_FILE)
-	@cat $(ANL_FILE)
+	@cppcheck --quiet --enable=all --project=$(LST_FILE) --output-file=$(STC_FILE)
+	@complexity --histogram --score --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $(SRC_FILES) > $(CPX_FILE)
+	@cat $(STC_FILE)
+	@cat $(CPX_FILE)
 test: clean test_setup run
 test_setup:
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
