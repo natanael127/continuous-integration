@@ -68,14 +68,15 @@ test_setup:
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
-	@mkdir -p $(dir $@)
-	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<
 	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
 	@mkdir -p $(dir $(CPX_INDIVIDUAL_FILE))
+	@mkdir -p $(dir $@)
+	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<
 	@complexity --histogram --score --trace=$(CPX_INDIVIDUAL_FILE) --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $< >> $(CPX_INDIVIDUAL_FILE)
 $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
 	@mkdir -p $(dir $@)
-	@$(CC) -MM $< > $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
-	@(echo -n $(OBJ_DIR) && cat $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)) > $@
-	@rm -f $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@)
+	@$(eval TMP_FILE := $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@))
+	@$(CC) -MM $< > $(TMP_FILE)
+	@(echo -n $(OBJ_DIR) && cat $(TMP_FILE)) > $@
+	@rm -f $(TMP_FILE)
 include $(DEP_FILES)
