@@ -9,6 +9,7 @@ GIT_COMMIT_HASH_STR=\"$(shell git rev-parse --short HEAD)\"
 # ================================== CONSTANTS =========================================================================
 # Extensions
 SRC_EXT := c
+HDR_EXT := h
 OBJ_EXT := o
 DEP_EXT := d
 TMP_EXT := tmp
@@ -39,6 +40,7 @@ COMPLEXITY_GLOBAL_THRESHOLD := 0
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_PATH := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
 SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
+HDR_FILES := $(call rwildcard,$(SRC_DIR),*.$(HDR_EXT))
 OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
 DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
 LST_FILE := $(ANL_DIR)$(LST_NAME).$(LST_EXT)
@@ -56,6 +58,8 @@ run: all
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_PATH)
+format:
+	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
