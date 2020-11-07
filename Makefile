@@ -72,16 +72,19 @@ format:                                                             # Applies fo
 	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)         # Uses clang-format with customized template
 analysis:                                                           # Static and complexity analysis
 	@mkdir -p $(ANL_DIR)                                            # Creates if doesn't exist
-	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
+	@ # Runs make without actually calling gcc and creates a JSON compile database
+	@make --always-make --dry-run |\
+	grep -wE 'gcc|g++' | grep -w '\-c' |\
+	jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
 	@cppcheck --quiet --enable=all --project=$(LST_FILE) --output-file=$(STC_FILE)
 	@complexity --histogram --score --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $(SRC_FILES) > $(CPX_FILE)
-	@cat $(STC_FILE)
-	@cat $(CPX_FILE)
+	@cat $(STC_FILE)                                                # Display analysis of 'cppcheck'
+	@cat $(CPX_FILE)                                                # Display analysis of 'complexity'
 # Binary organization
-descripted: all
+descripted: all                                                     # Creates a git-descripted binary
 	@mkdir -p $(OTR_DIR)
-	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
-releases: save_work $(TAG_FILES)
+	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)" # Copies built binary to a descripted place
+releases: save_work $(TAG_FILES)                                    # Creates all releases from tags (incrementally)
 	@echo Releases successfully generated!
 # ---------------------------------- INTERNAL TARGETS ------------------------------------------------------------------
 not_dirty: force_not_dirty all
