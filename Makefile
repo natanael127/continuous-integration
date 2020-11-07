@@ -87,11 +87,13 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
 	@git checkout --quiet $(THE_TAG)
+	@git clean --quiet -fd
 	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile
 	@make -s
 	@git checkout --quiet $(GIT_MAIN_BRANCH)
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
-	@echo Should release $(THE_TAG) here
+	@echo Released tag: $(THE_TAG)
+	@echo =========================================================
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
