@@ -56,22 +56,22 @@ CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
 # ================================== TARGETS ===========================================================================
 # ---------------------------------- USER TARGETS ----------------------------------------------------------------------
 # Building and testing processes
-all: $(OBJ_FILES)
+all: $(OBJ_FILES)                                                   # Main target (just builds the binary)
 	@echo Linking objects to \"$(BIN_FILE)\"
-	@mkdir -p $(BIN_DIR)
-	@$(CC) $(C_FLAGS) -o $(BIN_FILE) $(OBJ_FILES)
-clean:
+	@mkdir -p $(BIN_DIR)                                            # Creates if doesn't exist
+	@$(CC) $(C_FLAGS) -o $(BIN_FILE) $(OBJ_FILES)                   # Links object files to binary
+clean:                                                              # Cleans all files related to build and analysis
 	@rm -rf $(BUILD_DIR)
-run: all
+run: all                                                            # Runs application after building it
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_FILE)
-test: clean test_setup run
+test: clean test_setup run                                          # Run application for tests
 # Code quality
-format:
-	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)
-analysis:
-	@mkdir -p $(ANL_DIR)
+format:                                                             # Applies formatting rules
+	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)         # Uses clang-format with customized template
+analysis:                                                           # Static and complexity analysis
+	@mkdir -p $(ANL_DIR)                                            # Creates if doesn't exist
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
 	@cppcheck --quiet --enable=all --project=$(LST_FILE) --output-file=$(STC_FILE)
 	@complexity --histogram --score --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $(SRC_FILES) > $(CPX_FILE)
