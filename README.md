@@ -14,22 +14,22 @@ make <target_name>
 
 ## Building processes
 ### all
-Description
+Builds the project and creates the binary at path ```BIN_FILE```
 ### clean
-Description
+Cleans all build products, removing the directory ```BUILD_DIR```
 ### run
-Description
+The same as ```all```, but after building, runs the application directly
 ### test
-Description
+Automated test routine, here it compiles the code using the directive ```TEST_MODE```
 
 ## Code quality
 ### format
-Description
+Formats the header and source files using the tool ```clang-format``` according to template file ```.clang-format```
 ### analysis
-Description
+Uses tools ```cppcheck``` and ```complexity``` to give reports about the code
 
 ## Binary organization
 ### descripted
-Description
+Creates a git-descripted binary of current state of project inside directory ```OTR_DIR```
 ### releases
-Description
+Creates all missing release files to path ```TAG_DIR```
