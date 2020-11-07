@@ -87,7 +87,6 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
 	@git checkout --quiet $(THE_TAG)
-	@git clean --quiet -fd
 	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile
 	@make -s
 	@git checkout --quiet $(GIT_MAIN_BRANCH)
