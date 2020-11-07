@@ -40,7 +40,7 @@ STC_NAME := static
 CPX_NAME := complexity
 COMPLEXITY_GLOBAL_THRESHOLD := 0
 # Git
-GIT_MAIN_BRANCH := automatic-release-tags
+GIT_MAIN_BRANCH := master
 
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
