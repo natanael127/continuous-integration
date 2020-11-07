@@ -3,9 +3,9 @@
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 # ================================== VARIABLES FROM SHELL COMMANDS =====================================================
-GIT_DESCRIPTION_STR=$(shell git describe --dirty=-dirty)
-GIT_COMMIT_HASH_STR=$(shell git rev-parse --short HEAD)
-GIT_TAGS=$(shell git tag)
+GIT_DESCRIPTION_STR := $(shell git describe --dirty=-dirty)
+GIT_COMMIT_HASH_STR := $(shell git rev-parse --short HEAD)
+GIT_TAGS := $(shell git tag)
 
 # ================================== CONSTANTS =========================================================================
 # Extensions
@@ -32,7 +32,7 @@ BIN_NAME := app
 # Compiler
 CC := gcc
 C_FLAGS := -Wall
-PRJ_FLAGS := -D_GIT_DESCRIPTION_STR=\"$(GIT_DESCRIPTION_STR)\" -D_GIT_COMMIT_HASH_STR=\"$(GIT_COMMIT_HASH_STR)\"
+PRJ_FLAGS = -D_GIT_DESCRIPTION_STR=\"$(GIT_DESCRIPTION_STR)\" -D_GIT_COMMIT_HASH_STR=\"$(GIT_COMMIT_HASH_STR)\"
 TEST_FLAGS := -D_TEST_MODE
 # Static analysis
 LST_NAME := project
@@ -66,6 +66,9 @@ run: all
 	@$(BIN_FILE)
 format:
 	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)
+not_dirty: force_not_dirty all
+force_not_dirty:
+	@$(eval GIT_DESCRIPTION_STR := $(shell git describe))
 descripted: all
 	@mkdir -p $(OTR_DIR)
 	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
@@ -92,7 +95,7 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile .gitignore
 	@git clean --quiet -fd
 	@make -s clean
-	@make -s
+	@make -s not_dirty
 	@git checkout --quiet $(GIT_MAIN_BRANCH)
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
 	@echo Released tag: $(THE_TAG)
