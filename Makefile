@@ -116,7 +116,7 @@ $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)   # Builds
 	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
 	@mkdir -p $(dir $(CPX_INDIVIDUAL_FILE))                             # Organizes obj. files in same directory...
 	@mkdir -p $(dir $@)                                                 # structure as the source files
-	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<                          # Builds object
+	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<
 	@complexity --histogram --score --trace=$(CPX_INDIVIDUAL_FILE) --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $< >> $(CPX_INDIVIDUAL_FILE)                                                   # Creates individual complexity report
 $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)                          # Creates dependency file
 	@mkdir -p $(dir $@)                                                 # Creates directory if doesn't exist
