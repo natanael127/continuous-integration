@@ -5,6 +5,7 @@ rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 # ================================== VARIABLES FROM SHELL COMMANDS =====================================================
 GIT_DESCRIPTION_STR=$(shell git describe --dirty=-dirty)
 GIT_COMMIT_HASH_STR=$(shell git rev-parse --short HEAD)
+GIT_TAGS=$(shell git tag)
 
 # ================================== CONSTANTS =========================================================================
 # Extensions
@@ -38,7 +39,8 @@ LST_NAME := project
 STC_NAME := static
 CPX_NAME := complexity
 COMPLEXITY_GLOBAL_THRESHOLD := 0
-
+# Git
+GIT_MAIN_BRANCH := master
 
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
@@ -46,6 +48,7 @@ SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
 HDR_FILES := $(call rwildcard,$(SRC_DIR),*.$(HDR_EXT))
 OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
 DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
+TAG_FILES := $(patsubst %, $(TAG_DIR)%.$(BIN_EXT), $(GIT_TAGS))
 LST_FILE := $(ANL_DIR)$(LST_NAME).$(LST_EXT)
 STC_FILE := $(ANL_DIR)$(STC_NAME).$(ANL_EXT)
 CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
@@ -66,6 +69,9 @@ format:
 descripted: all
 	@mkdir -p $(OTR_DIR)
 	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
+releases: $(TAG_FILES)
+	@git checkout $(GIT_MAIN_BRANCH)
+	@echo Releases successfully generated!
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
@@ -76,6 +82,13 @@ analysis:
 test: clean test_setup run
 test_setup:
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
+$(TAG_DIR)%.$(BIN_EXT):
+	@mkdir -p $(TAG_DIR)
+	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
+	@git checkout $(THE_TAG)
+	@make -s
+	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
+	@echo Should release $(THE_TAG) here
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
 	@echo Building \"$@\" from \"$<\"
 	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
