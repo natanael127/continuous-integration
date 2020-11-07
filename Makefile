@@ -39,6 +39,8 @@ LST_NAME := project
 STC_NAME := static
 CPX_NAME := complexity
 COMPLEXITY_GLOBAL_THRESHOLD := 0
+# Git
+GIT_MAIN_BRANCH := automatic-release-tags
 
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
@@ -86,7 +88,7 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
 	@git checkout $(THE_TAG)
-	@git checkout $(GIT_COMMIT_HASH_STR) -- Makefile
+	@git checkout $(GIT_MAIN_BRANCH) -- Makefile
 	@make -s
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
 	@echo Should release $(THE_TAG) here
