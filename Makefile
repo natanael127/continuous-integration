@@ -87,7 +87,7 @@ descripted: all                                                     # Creates a 
 releases: save_work $(TAG_FILES)                                    # Creates all releases from tags (incrementally)
 	@echo Releases successfully generated!
 # ---------------------------------- INTERNAL TARGETS ------------------------------------------------------------------
-not_dirty: force_not_dirty all                                      # Removes 'dirty' signal in a controled way
+not_dirty: force_not_dirty all                                      # Removes 'dirty' signal in a controled way...
 force_not_dirty:                                                    # because just the Makefile won't be over the tag
 	@$(eval GIT_DESCRIPTION_STR := $(shell git describe))
 save_work:                                                          # Stashes any possible change before 'checkouts'
@@ -111,17 +111,17 @@ $(TAG_DIR)%.$(BIN_EXT):                                             # Creates th
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"             # Copies binary file to release organization dir
 	@echo Released tag: $(THE_TAG)
 	@echo =========================================================
-$(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
+$(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)   # Builds the specific file object
 	@echo Building \"$@\" from \"$<\"
 	@$(eval CPX_INDIVIDUAL_FILE := $(patsubst $(OBJ_DIR)%.$(OBJ_EXT),$(CPX_DIR)%.$(ANL_EXT), $@))
-	@mkdir -p $(dir $(CPX_INDIVIDUAL_FILE))
-	@mkdir -p $(dir $@)
-	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<
-	@complexity --histogram --score --trace=$(CPX_INDIVIDUAL_FILE) --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $< >> $(CPX_INDIVIDUAL_FILE)
-$(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)
-	@mkdir -p $(dir $@)
-	@$(eval TMP_FILE := $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@))
-	@$(CC) -MM $< > $(TMP_FILE)
-	@(echo -n $(OBJ_DIR) && cat $(TMP_FILE)) > $@
-	@rm -f $(TMP_FILE)
-include $(DEP_FILES)
+	@mkdir -p $(dir $(CPX_INDIVIDUAL_FILE))                             # Organizes obj. files in same directory...
+	@mkdir -p $(dir $@)                                                 # structure as the source files
+	@$(CC) $(C_FLAGS) $(PRJ_FLAGS) -c -o $@ $<                          # Builds object
+	@complexity --histogram --score --trace=$(CPX_INDIVIDUAL_FILE) --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $< >> $(CPX_INDIVIDUAL_FILE)                                                   # Creates individual complexity report
+$(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)                          # Creates dependency file
+	@mkdir -p $(dir $@)                                                 # Creates directory if doesn't exist
+	@$(eval TMP_FILE := $(patsubst %.$(DEP_EXT), %.$(TMP_EXT), $@))     # Temporary file for holding information
+	@$(CC) -MM $< > $(TMP_FILE)                                         # Depency generation
+	@(echo -n $(OBJ_DIR) && cat $(TMP_FILE)) > $@                       # Concatenates the predecessor path to .d file
+	@rm -f $(TMP_FILE)                                                  # Deletes temporary file
+include $(DEP_FILES)                                                    # Dependency files (like header files)
