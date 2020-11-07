@@ -43,15 +43,15 @@ COMPLEXITY_GLOBAL_THRESHOLD := 0
 GIT_MAIN_BRANCH := master
 
 # ================================== VARIABLES FROM MACROS =============================================================
-BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
-SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))
-HDR_FILES := $(call rwildcard,$(SRC_DIR),*.$(HDR_EXT))
-OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))
-DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))
-TAG_FILES := $(patsubst %, $(TAG_DIR)%.$(BIN_EXT), $(GIT_TAGS))
-LST_FILE := $(ANL_DIR)$(LST_NAME).$(LST_EXT)
-STC_FILE := $(ANL_DIR)$(STC_NAME).$(ANL_EXT)
-CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
+BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)                                            # Resulted binary
+SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))                                  # Sources
+HDR_FILES := $(call rwildcard,$(SRC_DIR),*.$(HDR_EXT))                                  # Headers
+OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))   # Objects
+DEP_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(DEP_DIR)%.$(DEP_EXT), $(SRC_FILES))   # Dependency files
+TAG_FILES := $(patsubst %, $(TAG_DIR)%.$(BIN_EXT), $(GIT_TAGS))     # List of release files
+LST_FILE := $(ANL_DIR)$(LST_NAME).$(LST_EXT)                        # JSON compile database for cppcheck
+STC_FILE := $(ANL_DIR)$(STC_NAME).$(ANL_EXT)                        # Cppcheck general report
+CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)                        # Complexity general report
 
 # ================================== TARGETS ===========================================================================
 # ---------------------------------- USER TARGETS ----------------------------------------------------------------------
