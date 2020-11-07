@@ -86,6 +86,7 @@ descripted: all                                                     # Creates a 
 	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)" # Copies built binary to a descripted place
 releases: save_work $(TAG_FILES)                                    # Creates all releases from tags (incrementally)
 	@echo Releases successfully generated!
+	@echo Project now is checked-out to branch $(GIT_MAIN_BRANCH)
 # ---------------------------------- INTERNAL TARGETS ------------------------------------------------------------------
 not_dirty: force_not_dirty all                                      # Removes 'dirty' signal in a controled way...
 force_not_dirty:                                                    # because just the Makefile won't be over the tag
