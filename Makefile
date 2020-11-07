@@ -18,7 +18,7 @@ ANL_EXT := txt
 BIN_EXT := elf
 # Paths
 BUILD_DIR := build/
-RLEAS_DIR := releases/
+RLEAS_DIR := released/
 SRC_DIR := components/
 OBJ_DIR := $(BUILD_DIR)obj/
 DEP_DIR := $(BUILD_DIR)dep/
