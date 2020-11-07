@@ -58,7 +58,7 @@ CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
 # Building and testing processes
 all: $(OBJ_FILES)                                                   # Main target (just builds the binary)
 	@echo Linking objects to \"$(BIN_FILE)\"
-	@mkdir -p $(BIN_DIR)                                            # Creates if doesn't exist
+	@mkdir -p $(BIN_DIR)                                            # Creates directory if doesn't exist
 	@$(CC) $(C_FLAGS) -o $(BIN_FILE) $(OBJ_FILES)                   # Links object files to binary
 clean:                                                              # Cleans all files related to build and analysis
 	@rm -rf $(BUILD_DIR)
@@ -71,7 +71,7 @@ test: clean test_setup run                                          # Run applic
 format:                                                             # Applies formatting rules
 	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)         # Uses clang-format with customized template
 analysis:                                                           # Static and complexity analysis
-	@mkdir -p $(ANL_DIR)                                            # Creates if doesn't exist
+	@mkdir -p $(ANL_DIR)                                            # Creates directory if doesn't exist
 	@ # Runs make without actually calling gcc and creates a JSON compile database
 	@make --always-make --dry-run |\
 	grep -wE 'gcc|g++' | grep -w '\-c' |\
@@ -87,26 +87,28 @@ descripted: all                                                     # Creates a 
 releases: save_work $(TAG_FILES)                                    # Creates all releases from tags (incrementally)
 	@echo Releases successfully generated!
 # ---------------------------------- INTERNAL TARGETS ------------------------------------------------------------------
-not_dirty: force_not_dirty all
-force_not_dirty:
+not_dirty: force_not_dirty all                                      # Removes 'dirty' signal in a controled way
+force_not_dirty:                                                    # because just the Makefile won't be over the tag
 	@$(eval GIT_DESCRIPTION_STR := $(shell git describe))
-save_work:
+save_work:                                                          # Stashes any possible change before 'checkouts'
 	@git stash save -u --quiet "Saved from make process"
-test_setup:
+test_setup:                                                         # Appends TEST_FLAGS to build definitions
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
 # ---------------------------------- FILE TARGETS ----------------------------------------------------------------------
-$(TAG_DIR)%.$(BIN_EXT):
-	@mkdir -p $(TAG_DIR)
-	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
-	@git submodule --quiet deinit --all
-	@git checkout --quiet $(THE_TAG)
-	@git submodule --quiet update --init --recursive
-	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile .gitignore
-	@git clean --quiet -fd
-	@make -s clean
-	@make -s not_dirty
-	@git checkout --quiet $(GIT_MAIN_BRANCH)
-	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
+$(TAG_DIR)%.$(BIN_EXT):                                             # Creates the specific release file
+	@mkdir -p $(TAG_DIR)                                            # Creates directory if doesn't exist
+	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))    # Extracts the tag from intended release file
+	@git submodule --quiet deinit --all                             # Disables submodules for 'checkout'
+	@git checkout --quiet $(THE_TAG)                                # Goes to tag status
+	@git submodule --quiet update --init --recursive                # Enables just the required submodules for that tag
+	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile .gitignore # Restores essential files from main branch (1)
+	@git clean --quiet -fd                                          # Cleans any nonexistent file in that tag
+	@make -s clean                                                  # Cleans the build files (avoid wrong descriptions)
+	@make -s not_dirty                                              # Builds without word 'dirty' due to (1)
+	@git submodule --quiet deinit --all                             # Disables submodules for 'checkout'
+	@git checkout --quiet $(GIT_MAIN_BRANCH)                        # Goes back to main branch
+	@git submodule --quiet update --init --recursive                # Enables the required submodules for main branch
+	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"             # Copies binary file to release organization dir
 	@echo Released tag: $(THE_TAG)
 	@echo =========================================================
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
