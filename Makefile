@@ -72,7 +72,7 @@ descripted: all
 releases: save_work $(TAG_FILES)
 	@echo Releases successfully generated!
 save_work:
-	@git stash save -u "Saved from make process"
+	@git stash save -u --quiet "Saved from make process"
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
@@ -86,10 +86,10 @@ test_setup:
 $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
-	@git checkout $(THE_TAG)
-	@git checkout $(GIT_MAIN_BRANCH) -- Makefile
+	@git checkout --quiet $(THE_TAG)
+	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile
 	@make -s
-	@git checkout $(GIT_MAIN_BRANCH)
+	@git checkout --quiet $(GIT_MAIN_BRANCH)
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
 	@echo Should release $(THE_TAG) here
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
