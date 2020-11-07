@@ -43,7 +43,7 @@ COMPLEXITY_GLOBAL_THRESHOLD := 0
 GIT_MAIN_BRANCH := master
 
 # ================================== VARIABLES FROM MACROS =============================================================
-BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)                                            # Resulted binary
+BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
 SRC_FILES := $(call rwildcard,$(SRC_DIR),*.$(SRC_EXT))                                  # Sources
 HDR_FILES := $(call rwildcard,$(SRC_DIR),*.$(HDR_EXT))                                  # Headers
 OBJ_FILES := $(patsubst $(SRC_DIR)%.$(SRC_EXT), $(OBJ_DIR)%.$(OBJ_EXT), $(SRC_FILES))   # Objects
@@ -66,7 +66,7 @@ run: all                                                            # Runs appli
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_FILE)
-test: clean test_setup run                                          # Run application for tests
+test: clean _test_setup run                                         # Run application for tests
 # Code quality
 format:                                                             # Applies formatting rules
 	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)         # Uses clang-format with customized template
@@ -84,16 +84,16 @@ analysis:                                                           # Static and
 descripted: all                                                     # Creates a git-descripted binary
 	@mkdir -p $(OTR_DIR)
 	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)" # Copies built binary to a descripted place
-releases: save_work $(TAG_FILES)                                    # Creates all releases from tags (incrementally)
+releases: _save_work $(TAG_FILES)                                   # Creates all releases from tags (incrementally)
 	@echo Releases successfully generated!
 	@echo Project now is checked-out to branch $(GIT_MAIN_BRANCH)
 # ---------------------------------- INTERNAL TARGETS ------------------------------------------------------------------
-not_dirty: force_not_dirty all                                      # Removes 'dirty' signal in a controled way...
-force_not_dirty:                                                    # because just the Makefile won't be over the tag
+_not_dirty: _force_not_dirty all                                     # Removes 'dirty' signal in a controled way...
+_force_not_dirty:                                                    # because just the Makefile won't be over the tag
 	@$(eval GIT_DESCRIPTION_STR := $(shell git describe))
-save_work:                                                          # Stashes any possible change before 'checkouts'
+_save_work:                                                          # Stashes any possible change before 'checkouts'
 	@git stash save -u --quiet "Saved from make process"
-test_setup:                                                         # Appends TEST_FLAGS to build definitions
+_test_setup:                                                         # Appends TEST_FLAGS to build definitions
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
 # ---------------------------------- FILE TARGETS ----------------------------------------------------------------------
 $(TAG_DIR)%.$(BIN_EXT):                                             # Creates the specific release file
@@ -105,7 +105,7 @@ $(TAG_DIR)%.$(BIN_EXT):                                             # Creates th
 	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile .gitignore # Restores essential files from main branch (1)
 	@git clean --quiet -fd                                          # Cleans any nonexistent file in that tag
 	@make -s clean                                                  # Cleans the build files (avoid wrong descriptions)
-	@make -s not_dirty                                              # Builds without word 'dirty' due to (1)
+	@make -s _not_dirty                                             # Builds without word 'dirty' due to (1)
 	@git submodule --quiet deinit --all                             # Disables submodules for 'checkout'
 	@git checkout --quiet $(GIT_MAIN_BRANCH)                        # Goes back to main branch
 	@git submodule --quiet update --init --recursive                # Enables the required submodules for main branch
