@@ -54,6 +54,8 @@ STC_FILE := $(ANL_DIR)$(STC_NAME).$(ANL_EXT)
 CPX_FILE := $(ANL_DIR)$(CPX_NAME).$(ANL_EXT)
 
 # ================================== TARGETS ===========================================================================
+# ---------------------------------- USER TARGETS ----------------------------------------------------------------------
+# Building and testing processes
 all: $(OBJ_FILES)
 	@echo Linking objects to \"$(BIN_FILE)\"
 	@mkdir -p $(BIN_DIR)
@@ -64,18 +66,10 @@ run: all
 	@echo Running the application
 	@echo =========================================================
 	@$(BIN_FILE)
+test: clean test_setup run
+# Code quality
 format:
 	@clang-format --style=file -i $(SRC_FILES) $(HDR_FILES)
-not_dirty: force_not_dirty all
-force_not_dirty:
-	@$(eval GIT_DESCRIPTION_STR := $(shell git describe))
-descripted: all
-	@mkdir -p $(OTR_DIR)
-	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
-releases: save_work $(TAG_FILES)
-	@echo Releases successfully generated!
-save_work:
-	@git stash save -u --quiet "Saved from make process"
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
@@ -83,9 +77,21 @@ analysis:
 	@complexity --histogram --score --thresh=$(COMPLEXITY_GLOBAL_THRESHOLD) $(SRC_FILES) > $(CPX_FILE)
 	@cat $(STC_FILE)
 	@cat $(CPX_FILE)
-test: clean test_setup run
+# Binary organization
+descripted: all
+	@mkdir -p $(OTR_DIR)
+	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
+releases: save_work $(TAG_FILES)
+	@echo Releases successfully generated!
+# ---------------------------------- INTERNAL TARGETS ------------------------------------------------------------------
+not_dirty: force_not_dirty all
+force_not_dirty:
+	@$(eval GIT_DESCRIPTION_STR := $(shell git describe))
+save_work:
+	@git stash save -u --quiet "Saved from make process"
 test_setup:
 	@$(eval PRJ_FLAGS += $(TEST_FLAGS))
+# ---------------------------------- FILE TARGETS ----------------------------------------------------------------------
 $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
