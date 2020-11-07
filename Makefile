@@ -88,6 +88,7 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
 	@git checkout --quiet $(THE_TAG)
 	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile
+	@make -s clean
 	@make -s
 	@git checkout --quiet $(GIT_MAIN_BRANCH)
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
