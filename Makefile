@@ -124,4 +124,4 @@ $(DEP_DIR)%.$(DEP_EXT): $(SRC_DIR)%.$(SRC_EXT)                          # Create
 	@$(CC) -MM $< > $(TMP_FILE)                                         # Depency generation
 	@(echo -n $(OBJ_DIR) && cat $(TMP_FILE)) > $@                       # Concatenates the predecessor path to .d file
 	@rm -f $(TMP_FILE)                                                  # Deletes temporary file
-include $(DEP_FILES)                                                    # Dependency files (like header files)
+include $(DEP_FILES)                                                    # Dependency files for complex dependencies
