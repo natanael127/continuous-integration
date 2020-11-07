@@ -39,8 +39,6 @@ LST_NAME := project
 STC_NAME := static
 CPX_NAME := complexity
 COMPLEXITY_GLOBAL_THRESHOLD := 0
-# Git
-GIT_MAIN_BRANCH := master
 
 # ================================== VARIABLES FROM MACROS =============================================================
 BIN_FILE := $(BIN_DIR)$(BIN_NAME).$(BIN_EXT)
@@ -69,9 +67,11 @@ format:
 descripted: all
 	@mkdir -p $(OTR_DIR)
 	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
-releases: $(TAG_FILES)
-	@git checkout $(GIT_MAIN_BRANCH)
+releases: save_work $(TAG_FILES)
+	@git checkout $(GIT_COMMIT_HASH_STR)
 	@echo Releases successfully generated!
+save_work:
+	@git stash save -u "Saved from make process"
 analysis:
 	@mkdir -p $(ANL_DIR)
 	@make --always-make --dry-run | grep -wE 'gcc|g++' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: match(" [^ ]+$$").string[1:]}]' > $(LST_FILE)
@@ -86,6 +86,7 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
 	@git checkout $(THE_TAG)
+	@git checkout $(GIT_COMMIT_HASH_STR) -- Makefile
 	@make -s
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
 	@echo Should release $(THE_TAG) here
