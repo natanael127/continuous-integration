@@ -70,7 +70,6 @@ descripted: all
 	@mkdir -p $(OTR_DIR)
 	@cp "$(BIN_FILE)" "$(OTR_DIR)$(GIT_DESCRIPTION_STR).$(BIN_EXT)"
 releases: save_work $(TAG_FILES)
-	@git checkout $(GIT_COMMIT_HASH_STR)
 	@echo Releases successfully generated!
 save_work:
 	@git stash save -u "Saved from make process"
@@ -90,6 +89,7 @@ $(TAG_DIR)%.$(BIN_EXT):
 	@git checkout $(THE_TAG)
 	@git checkout $(GIT_MAIN_BRANCH) -- Makefile
 	@make -s
+	@git checkout $(GIT_MAIN_BRANCH)
 	@cp "$(BIN_FILE)" "$(TAG_DIR)$(THE_TAG).$(BIN_EXT)"
 	@echo Should release $(THE_TAG) here
 $(OBJ_DIR)%.$(OBJ_EXT): $(SRC_DIR)%.$(SRC_EXT) $(DEP_DIR)%.$(DEP_EXT)
