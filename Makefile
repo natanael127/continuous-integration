@@ -86,7 +86,9 @@ test_setup:
 $(TAG_DIR)%.$(BIN_EXT):
 	@mkdir -p $(TAG_DIR)
 	@$(eval THE_TAG := $(patsubst $(TAG_DIR)%.$(BIN_EXT),%, $@))
+	@git submodule --quiet deinit --all
 	@git checkout --quiet $(THE_TAG)
+	@git submodule --quiet update --init --recursive
 	@git checkout --quiet $(GIT_MAIN_BRANCH) -- Makefile .gitignore
 	@git clean --quiet -fd
 	@make -s clean
